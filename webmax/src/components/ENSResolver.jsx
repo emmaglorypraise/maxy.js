@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Blockchain from '../utils/main'; 
+import Blockchain from '../utils/main';
 import './ENSResolver.css'
 
 const styles = {
@@ -21,8 +21,8 @@ const EnsResolver = () => {
   const [privateKey, setPrivateKey] = useState('');
 
 
-const ethers = require("ethers");
-  
+  const ethers = require("ethers");
+
   const blockchain = new Blockchain("https://goerli.infura.io/v3/7e0349ac80744375934bcf0ae67a9a9c");
 
   const [blockNumber, setBlockNumber] = useState(null);
@@ -68,53 +68,53 @@ const ethers = require("ethers");
   const connectWalletWithEns = async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const resolvedAddress = await resolveENS(ensName, provider);
-    
+
     if (resolvedAddress) {
       alert('Wallet connected successfully using ENS!');
     }
   };
-  
+
 
   return (
     <div className="container">
 
 
-     <div style={{ padding: "50px" }}>
+      <div style={{ padding: "50px" }}>
 
 
-     <h1>ENS Maxy</h1>
+        <h1>ENS Maxy</h1>
 
-      <button onClick={handleWalletSelection} style={styles.button}>Select Wallet</button>
-      <div style={{ margin: "20px 10px" , width: "100%"}}>
-      <input 
-            type="text" 
-            id="privateKey" 
-            value={privateKey} 
-            onChange={handlePrivateKeyChange} 
-            placeholder="Enter your private key to connect wallet (optional)" 
-       />
+        <button onClick={handleWalletSelection} style={styles.button}>Select Wallet</button>
+        <div style={{ margin: "20px 10px", width: "100%" }}>
+          <input
+            type="text"
+            id="privateKey"
+            value={privateKey}
+            onChange={handlePrivateKeyChange}
+            placeholder="Enter your private key to connect wallet (optional)"
+          />
+        </div>
+        <button onClick={handleConnectWallet} style={styles.button}>Connect Wallet</button>
+
+        <div style={{ margin: "20px 10px", width: "100%" }}>
+          <input
+            type="text"
+            id="ensName"
+            value={ensName}
+            onChange={handleEnsNameChange}
+            placeholder="Enter your ENS name"
+          />
+        </div>
+
+        <button onClick={connectWalletWithEns} style={styles.button}>Connect with ENS</button>
+
+        <button onClick={handleGetBlockNumber} style={styles.button}>Get Block Number</button>
+
+        {blockNumber && <div style={styles.blockNumber}>
+          Current Block Number: {blockNumber}
+        </div>}
       </div>
-      <button onClick={handleConnectWallet} style={styles.button}>Connect Wallet</button>
 
-      <div style={{ margin: "20px 10px" , width: "100%"}}>
-        <input 
-          type="text" 
-          id="ensName" 
-          value={ensName} 
-          onChange={handleEnsNameChange} 
-          placeholder="Enter your ENS name" 
-        />
-      </div>
-
-      <button onClick={connectWalletWithEns} style={styles.button}>Connect with ENS</button>
-
-      <button onClick={handleGetBlockNumber} style={styles.button}>Get Block Number</button>
-
-      {blockNumber && <div style={styles.blockNumber}>
-        Current Block Number: {blockNumber}
-      </div>}
-    </div>
-      
     </div>
   );
 };
