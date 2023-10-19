@@ -68,7 +68,7 @@ class Blockchain {
         } else {
           this.wallet = ethers.Wallet.createRandom();
           console.log(`Banana wallet connected with a new random private key! Address: ${this.wallet.address}, Private Key: ${this.wallet.privateKey}`);
-          alert("Banana wallet connected with a new random private key!");
+          alert("Banana wallet connected with a new random private key! Check console for wallet details.");
         }
         break;
 
