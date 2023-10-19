@@ -2,6 +2,8 @@
 const ethers = require("ethers");
 
 class Blockchain {
+  wallets = ['bananawallet', 'metamask', 'walletconnect']; 
+
   constructor(providerUrl) {
     if (!providerUrl) {
       throw new Error('Provider URL is required.');
@@ -13,26 +15,24 @@ class Blockchain {
 
   async walletSelection() {
     const modal = document.createElement('div');
+    const walletListHTML = this.wallets.map(wallet =>
+      `<li style="margin: 10px; cursor: pointer;" onmouseover="this.style.backgroundColor='#007bff'; this.style.color='#FFFFFF';" onmouseout="this.style.backgroundColor=''; this.style.color='';" onclick="savePreference('${wallet}'); this.style.backgroundColor='#007bff'; this.style.color='#FFFFFF'; closeModal();">${wallet}</li>`
+    ).join('');
+
     modal.innerHTML = `
       <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;">
         <div style="background-color: white; padding: 20px; border-radius: 10px; text-align: center;">
           <h2>Select Your Preferred Wallet</h2>
-          <select id="walletSelector">
-            <option value="banana">Banana wallet</option>
-            <option value="metamask">MetaMask</option>
-            <option value="walletConnect">WalletConnect</option>
-            <!-- Add more wallets here -->
-          </select>
-          <button onclick="savePreference(); closeModal();">Save Preference</button>
+          <ul id="walletList" style="list-style-type: none; padding: 0;">
+            ${walletListHTML}
+          </ul>
         </div>
       </div>
     `;
 
     document.body.appendChild(modal);
-    window.savePreference = function () {
-      const selector = document.getElementById('walletSelector');
-      const selectedWallet = selector.options[selector.selectedIndex].value;
-      localStorage.setItem('preferredWallet', selectedWallet);
+    window.savePreference = function (wallet) {
+      localStorage.setItem('preferredWallet', wallet);
       alert('Preference saved!');
     }
     window.closeModal = function () {
@@ -45,33 +45,50 @@ class Blockchain {
 
     switch (preferredWallet) {
       case 'metamask':
-        if (window.ethereum) {
-          this.provider = new ethers.BrowserProvider(window.ethereum);
-          this.wallet = this.provider.getSigner();
-          try {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-          } catch (error) {
-            alert("User denied account access");
-          }
+        let signer = null;
+
+        let provider;
+        if (window.ethereum == null) {
+          console.log("MetaMask not installed; using read-only defaults")
+          provider = ethers.getDefaultProvider()
+
         } else {
-          alert('Non-Ethereum browser detected. Consider installing MetaMask!');
+          provider = new ethers.BrowserProvider(window.ethereum)
+          signer = await provider.getSigner();
+          console.log("signer", signer);
+          alert('Metawallet connected successfully!');
         }
         break;
 
-        case 'customWalletWithPrivateKey':
-          this.provider = new ethers.providers.JsonRpcProvider('YOUR_CUSTOM_WALLET_PROVIDER_URL');
-          if (privateKey) {
-            try {
-              this.wallet = new ethers.Wallet(privateKey, this.provider);
-            } catch (error) {
-              alert("Error creating wallet with private key:", error);
-            }
-          } else {
-            // If no private key is provided, you might want to handle connections differently.
-            // This will depend on your specific requirements and wallet API.
-            alert('Connecting to custom wallet without a private key');
+      case 'bananawallet':
+        if (privateKey) {
+          this.wallet = new ethers.Wallet(privateKey, this.provider);
+          console.log(`Banana wallet connected! Address: ${this.wallet.address}, Private Key: ${privateKey}`);
+          alert("Banana wallet connected with provided private key!");
+        } else {
+          this.wallet = ethers.Wallet.createRandom();
+          console.log(`Banana wallet connected with a new random private key! Address: ${this.wallet.address}, Private Key: ${this.wallet.privateKey}`);
+          alert("Banana wallet connected with a new random private key!");
+        }
+        break;
+
+      case 'walletconnect':
+        alert('WalletConnect functionality is not implemented yet.');
+        break;
+
+
+      case 'customWalletWithPrivateKey':
+        this.provider = new ethers.providers.JsonRpcProvider('YOUR_CUSTOM_WALLET_PROVIDER_URL');
+        if (privateKey) {
+          try {
+            this.wallet = new ethers.Wallet(privateKey, this.provider);
+          } catch (error) {
+            alert("Error creating wallet with private key:", error);
           }
-          break;
+        } else {
+          alert('Connecting to custom wallet without a private key');
+        }
+        break;
 
       default:
         alert("No preferred wallet found or the wallet is not supported.");
@@ -150,7 +167,6 @@ class Blockchain {
     return result;
   }
 
-
   async getBlockNumber() {
     const response = await this.provider.send("eth_blockNumber");
     return parseInt(response.result, 16);
@@ -193,7 +209,7 @@ class Blockchain {
   async getTokenBalance(contractAddress, abi, address) {
     const contract = new ethers.Contract(contractAddress, abi, this.provider);
     const balance = await contract.balanceOf(address);
-    return ethers.utils.formatUnits(balance, 18); // assuming 18 decimal places
+    return ethers.utils.formatUnits(balance, 18); 
   }
 
   signMessage(message) {
@@ -202,6 +218,10 @@ class Blockchain {
 
   verifySignature(message, signature) {
     return ethers.utils.verifyMessage(message, signature);
+  }
+
+  setContract(contract) {
+    this.contract = contract;
   }
 }
 
