@@ -12,7 +12,7 @@ import Blockchain from '../utils/main ';
 
 ### `initialize library`
 
-const blockchain = new Blockchain("https://goerli.infura.io/v3/7e0349ac80744375934bcf0ae67a9a9c");
+const blockchain = new Blockchain("https://goerli.infura.io/v3/YOUR-RPC");
 
 ### `use functions`
 
